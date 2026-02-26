@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function CreatePollPage() {
@@ -9,16 +9,20 @@ export default function CreatePollPage() {
   const [options, setOptions] = useState(["", ""]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const nextKey = useRef(2);
+  const [keys, setKeys] = useState([0, 1]);
 
   function addOption() {
     if (options.length < 6) {
       setOptions([...options, ""]);
+      setKeys([...keys, nextKey.current++]);
     }
   }
 
   function removeOption(index: number) {
     if (options.length > 2) {
       setOptions(options.filter((_, i) => i !== index));
+      setKeys(keys.filter((_, i) => i !== index));
     }
   }
 
@@ -63,7 +67,7 @@ export default function CreatePollPage() {
   }
 
   return (
-    <div>
+    <div className="animate-fade-in-up">
       <h1 className="text-3xl font-extrabold tracking-tight">Create a Poll</h1>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-8">
@@ -84,7 +88,7 @@ export default function CreatePollPage() {
             maxLength={500}
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            className="w-full rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+            className="w-full rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
             placeholder="What do you want to ask?"
           />
         </div>
@@ -95,21 +99,21 @@ export default function CreatePollPage() {
           </label>
           <div className="space-y-3">
             {options.map((option, i) => (
-              <div key={i} className="flex gap-3">
+              <div key={keys[i]} className="flex gap-3 animate-slide-in">
                 <input
                   type="text"
                   required
                   maxLength={200}
                   value={option}
                   onChange={(e) => updateOption(i, e.target.value)}
-                  className="flex-1 rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                  className="flex-1 rounded-xl border border-input-border bg-input-bg px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                   placeholder={`Option ${i + 1}`}
                 />
                 {options.length > 2 && (
                   <button
                     type="button"
                     onClick={() => removeOption(i)}
-                    className="rounded-xl px-4 py-3 text-sm font-medium text-muted hover:bg-card hover:text-danger transition-colors"
+                    className="rounded-xl px-4 py-3 text-sm font-medium text-muted hover:bg-card hover:text-danger active:scale-95 transition-all duration-200"
                   >
                     Remove
                   </button>
@@ -121,7 +125,7 @@ export default function CreatePollPage() {
             <button
               type="button"
               onClick={addOption}
-              className="mt-3 text-sm font-semibold text-primary hover:text-primary-hover transition-colors"
+              className="mt-3 text-sm font-semibold text-primary hover:text-primary-hover active:scale-95 transition-all duration-200"
             >
               + Add option
             </button>
@@ -131,7 +135,7 @@ export default function CreatePollPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-full bg-primary px-4 py-3.5 text-sm font-semibold text-primary-fg shadow-md shadow-primary/20 hover:bg-primary-hover disabled:opacity-50 transition-all"
+          className="w-full rounded-full bg-primary px-4 py-3.5 text-sm font-semibold text-primary-fg shadow-md shadow-primary/20 hover:bg-primary-hover active:scale-95 disabled:opacity-50 transition-all duration-200"
         >
           {loading ? "Creating..." : "Create Poll"}
         </button>

@@ -50,3 +50,86 @@ body {
   color: var(--foreground);
   background: var(--background);
 }
+
+/* Pop animation for vote selection */
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+.animate-pop {
+  animation: pop 0.3s ease-out;
+}
+
+/* Confetti burst after voting */
+@keyframes confetti-fade {
+  0% { opacity: 1; transform: scale(0.5); }
+  50% { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(1.3); }
+}
+.animate-confetti {
+  animation: confetti-fade 1.5s ease-out forwards;
+}
+
+/* Result bar grow-in from 0% */
+@keyframes bar-grow {
+  from { width: 0%; }
+}
+.animate-bar-grow {
+  animation: bar-grow 0.6s ease-out forwards;
+}
+
+/* Fade-in-up for page content */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out both;
+}
+
+/* Count bump on SSE update */
+@keyframes count-bump {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.2); color: var(--primary); }
+  100% { transform: scale(1); }
+}
+.animate-count-bump {
+  animation: count-bump 0.4s ease-out;
+}
+
+/* SSE ping flash on new vote */
+@keyframes vote-ping {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2.5); }
+}
+.animate-vote-ping {
+  animation: vote-ping 0.6s ease-out forwards;
+}
+
+/* Slide-in for new option rows */
+@keyframes slide-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-in {
+  animation: slide-in 0.25s ease-out both;
+}
+
+/* Subtle glow pulse for the winning bar */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--primary-rgb, 217, 119, 6), 0); }
+  50% { box-shadow: 0 0 8px 2px rgba(var(--primary-rgb, 217, 119, 6), 0.25); }
+}
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* Breathing animation for open status badges */
+@keyframes breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite;
+}

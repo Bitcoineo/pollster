@@ -9,19 +9,19 @@ export default async function DashboardPage() {
   const polls = await getMyPolls(session.user.id);
 
   return (
-    <div>
+    <div className="animate-fade-in-up">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-extrabold tracking-tight">My Polls</h1>
         <Link
           href="/dashboard/new"
-          className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-fg shadow-md shadow-primary/20 hover:bg-primary-hover transition-all"
+          className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-fg shadow-md shadow-primary/20 hover:bg-primary-hover active:scale-95 transition-all duration-200"
         >
           Create Poll
         </Link>
       </div>
 
       {polls.length === 0 ? (
-        <div className="mt-16 text-center">
+        <div className="mt-16 text-center animate-fade-in-up">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-card text-3xl">
             📊
           </div>
@@ -32,11 +32,12 @@ export default async function DashboardPage() {
         </div>
       ) : (
         <div className="mt-8 space-y-4">
-          {polls.map((poll) => (
+          {polls.map((poll, i) => (
             <Link
               key={poll.id}
               href={`/dashboard/polls/${poll.slug}`}
-              className="block rounded-2xl border border-card-border bg-card p-5 hover:border-primary/30 hover:shadow-md transition-all"
+              className="block rounded-2xl border border-card-border bg-card p-5 hover:border-primary/30 hover:shadow-md active:scale-[0.99] transition-all duration-200 animate-fade-in-up"
+              style={{ animationDelay: `${i * 75}ms` }}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
@@ -49,7 +50,7 @@ export default async function DashboardPage() {
                 <span
                   className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
                     poll.status === "open"
-                      ? "bg-accent-light text-accent"
+                      ? "bg-accent-light text-accent animate-breathe"
                       : "bg-card text-muted border border-card-border"
                   }`}
                 >

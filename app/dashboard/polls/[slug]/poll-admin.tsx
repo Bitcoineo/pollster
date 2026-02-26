@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 type Result = {
@@ -31,6 +31,9 @@ export default function PollAdmin({
   const [status, setStatus] = useState(initialPoll.status);
   const [copied, setCopied] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [countBump, setCountBump] = useState(false);
+  const [votePing, setVotePing] = useState(false);
+  const prevTotalRef = useRef(initialPoll.totalVotes);
 
   const shareUrl =
     typeof window !== "undefined"
@@ -43,6 +46,13 @@ export default function PollAdmin({
 
     es.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      if (data.totalVotes !== prevTotalRef.current) {
+        prevTotalRef.current = data.totalVotes;
+        setCountBump(true);
+        setVotePing(true);
+        setTimeout(() => setCountBump(false), 400);
+        setTimeout(() => setVotePing(false), 600);
+      }
       setResults(data.results);
       setTotalVotes(data.totalVotes);
       setStatus(data.status);
@@ -75,7 +85,6 @@ export default function PollAdmin({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Fallback for older browsers
       const input = document.createElement("input");
       input.value = shareUrl;
       document.body.appendChild(input);
@@ -87,13 +96,15 @@ export default function PollAdmin({
     }
   }
 
+  const maxVotes = Math.max(...results.map((r) => r.voteCount), 0);
+
   return (
-    <div>
+    <div className="animate-fade-in-up">
       <div className="flex items-start justify-between gap-4">
         <div>
           <Link
             href="/dashboard"
-            className="text-sm font-medium text-muted hover:text-foreground transition-colors"
+            className="text-sm font-medium text-muted hover:text-foreground transition-colors duration-200"
           >
             &larr; Back to polls
           </Link>
@@ -104,7 +115,7 @@ export default function PollAdmin({
         <span
           className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
             status === "open"
-              ? "bg-accent-light text-accent"
+              ? "bg-accent-light text-accent animate-breathe"
               : "bg-card text-muted border border-card-border"
           }`}
         >
@@ -121,7 +132,7 @@ export default function PollAdmin({
         />
         <button
           onClick={copyLink}
-          className="shrink-0 rounded-full border border-card-border bg-card px-6 py-3 text-sm font-semibold hover:border-primary/40 transition-all"
+          className="shrink-0 rounded-full border border-card-border bg-card px-6 py-3 text-sm font-semibold hover:border-primary/40 active:scale-95 transition-all duration-200"
         >
           {copied ? "Copied!" : "Copy link"}
         </button>
@@ -130,8 +141,21 @@ export default function PollAdmin({
       {/* Results */}
       <div className="mt-10">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold">
-            Results ({totalVotes} vote{totalVotes !== 1 ? "s" : ""})
+          <h2 className="relative text-lg font-bold">
+            Results (
+            <span
+              key={totalVotes}
+              className={`inline-block ${countBump ? "animate-count-bump" : ""}`}
+            >
+              {totalVotes}
+            </span>
+            {" "}vote{totalVotes !== 1 ? "s" : ""})
+            {votePing && (
+              <span className="absolute -right-4 top-0 h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-vote-ping rounded-full bg-primary" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+              </span>
+            )}
           </h2>
           {status === "open" && (
             <div className="flex items-center gap-2 text-xs font-semibold text-accent">
@@ -147,17 +171,25 @@ export default function PollAdmin({
         <div className="mt-5 space-y-4">
           {results.map((result) => {
             const pct = totalVotes > 0 ? (result.voteCount / totalVotes) * 100 : 0;
+            const isWinner = result.voteCount > 0 && result.voteCount === maxVotes;
             return (
               <div key={result.optionId}>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium">{result.text}</span>
+                  <span className="font-medium">
+                    {result.text}
+                    {isWinner && totalVotes > 0 && (
+                      <span className="ml-1.5 text-xs text-primary">★</span>
+                    )}
+                  </span>
                   <span className="text-muted">
                     {result.voteCount} ({pct.toFixed(1)}%)
                   </span>
                 </div>
                 <div className="mt-2 h-3 overflow-hidden rounded-full bg-card-border">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-[var(--bar-from)] to-[var(--bar-to)] transition-all duration-500"
+                    className={`h-full rounded-full bg-gradient-to-r from-[var(--bar-from)] to-[var(--bar-to)] transition-all duration-500 ${
+                      isWinner && totalVotes > 0 ? "animate-glow-pulse" : ""
+                    }`}
                     style={{ width: `${pct}%` }}
                   />
                 </div>
@@ -172,7 +204,7 @@ export default function PollAdmin({
         <button
           onClick={handleClose}
           disabled={closing}
-          className="mt-10 rounded-full border border-danger/30 px-6 py-2.5 text-sm font-semibold text-danger hover:bg-danger-light disabled:opacity-50 transition-all"
+          className="mt-10 rounded-full border border-danger/30 px-6 py-2.5 text-sm font-semibold text-danger hover:bg-danger-light active:scale-95 disabled:opacity-50 transition-all duration-200"
         >
           {closing ? "Closing..." : "Close Poll"}
         </button>

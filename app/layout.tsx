@@ -82,7 +82,7 @@ export default async function RootLayout({
                   >
                     <button
                       type="submit"
-                      className="rounded-full px-4 py-1.5 text-sm font-medium text-muted hover:bg-card hover:text-foreground transition-colors"
+                      className="rounded-full px-4 py-1.5 text-sm font-medium text-muted hover:bg-card hover:text-foreground active:scale-95 transition-all duration-200"
                     >
                       Sign out
                     </button>
@@ -91,7 +91,7 @@ export default async function RootLayout({
               ) : (
                 <Link
                   href="/auth/signin"
-                  className="rounded-full bg-primary px-5 py-1.5 text-sm font-medium text-primary-fg hover:bg-primary-hover transition-colors"
+                  className="rounded-full bg-primary px-5 py-1.5 text-sm font-medium text-primary-fg hover:bg-primary-hover active:scale-95 transition-all duration-200"
                 >
                   Sign in
                 </Link>
@@ -100,7 +100,7 @@ export default async function RootLayout({
           </div>
         </header>
 
-        <main>{children}</main>
+        <main className="animate-fade-in-up">{children}</main>
       </body>
     </html>
   );

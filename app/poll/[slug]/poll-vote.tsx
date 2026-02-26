@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Option = {
   id: string;
@@ -36,8 +36,14 @@ export default function PollVote({
   const [status, setStatus] = useState(initialPoll.status);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
+  const [viewingResults, setViewingResults] = useState(false);
   const [voting, setVoting] = useState(false);
   const [error, setError] = useState("");
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [justRevealed, setJustRevealed] = useState(false);
+  const [votePing, setVotePing] = useState(false);
+  const [countBump, setCountBump] = useState(false);
+  const prevTotalRef = useRef(initialPoll.totalVotes);
 
   // Check if user already voted (localStorage)
   useEffect(() => {
@@ -45,14 +51,22 @@ export default function PollVote({
     if (voted) setHasVoted(true);
   }, [slug]);
 
-  // SSE for real-time updates (after voting or if poll is closed)
+  // SSE for real-time updates (after voting, viewing results, or if poll is closed)
   useEffect(() => {
-    if (!hasVoted && status === "open") return;
+    if (!hasVoted && !viewingResults && status === "open") return;
 
     const es = new EventSource(`/api/polls/${slug}/stream`);
 
     es.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      // Animate if vote count actually changed
+      if (data.totalVotes !== prevTotalRef.current) {
+        prevTotalRef.current = data.totalVotes;
+        setCountBump(true);
+        setVotePing(true);
+        setTimeout(() => setCountBump(false), 400);
+        setTimeout(() => setVotePing(false), 600);
+      }
       setResults(data.results);
       setTotalVotes(data.totalVotes);
       setStatus(data.status);
@@ -63,7 +77,7 @@ export default function PollVote({
     };
 
     return () => es.close();
-  }, [slug, hasVoted, status]);
+  }, [slug, hasVoted, viewingResults, status]);
 
   async function handleVote(e: React.FormEvent) {
     e.preventDefault();
@@ -80,7 +94,6 @@ export default function PollVote({
       });
 
       if (res.status === 409) {
-        // Already voted — show results
         localStorage.setItem(`voted-${slug}`, "true");
         setHasVoted(true);
         setError("You have already voted on this poll");
@@ -96,6 +109,9 @@ export default function PollVote({
       }
 
       localStorage.setItem(`voted-${slug}`, "true");
+      setShowConfetti(true);
+      setJustRevealed(true);
+      setTimeout(() => setShowConfetti(false), 1500);
       setHasVoted(true);
     } catch {
       setError("Something went wrong");
@@ -103,10 +119,16 @@ export default function PollVote({
     setVoting(false);
   }
 
-  const showResults = hasVoted || status === "closed";
+  function handleViewResults() {
+    setJustRevealed(true);
+    setViewingResults(true);
+  }
+
+  const showResults = hasVoted || viewingResults || status === "closed";
+  const maxVotes = Math.max(...results.map((r) => r.voteCount), 0);
 
   return (
-    <div>
+    <div className="animate-fade-in-up">
       <h1 className="text-3xl font-extrabold tracking-tight">
         {initialPoll.question}
       </h1>
@@ -123,6 +145,13 @@ export default function PollVote({
         </div>
       )}
 
+      {/* Confetti burst */}
+      {showConfetti && (
+        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
+          <span className="animate-confetti text-6xl">🎉</span>
+        </div>
+      )}
+
       {!showResults ? (
         /* Voting form */
         <form onSubmit={handleVote} className="mt-8">
@@ -130,9 +159,9 @@ export default function PollVote({
             {initialPoll.options.map((option) => (
               <label
                 key={option.id}
-                className={`flex cursor-pointer items-center gap-4 rounded-2xl border-2 p-5 transition-all ${
+                className={`flex cursor-pointer items-center gap-4 rounded-2xl border-2 p-5 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
                   selectedOption === option.id
-                    ? "border-primary bg-primary/5 shadow-sm"
+                    ? "animate-pop border-primary bg-primary/5 shadow-sm"
                     : "border-card-border bg-card hover:border-primary/30 hover:shadow-sm"
                 }`}
               >
@@ -152,17 +181,39 @@ export default function PollVote({
           <button
             type="submit"
             disabled={!selectedOption || voting}
-            className="mt-6 w-full rounded-full bg-primary px-4 py-3.5 text-base font-semibold text-primary-fg shadow-lg shadow-primary/25 hover:bg-primary-hover hover:shadow-xl disabled:opacity-50 transition-all"
+            className="mt-6 w-full rounded-full bg-primary px-4 py-3.5 text-base font-semibold text-primary-fg shadow-lg shadow-primary/25 hover:bg-primary-hover hover:shadow-xl active:scale-95 disabled:opacity-50 transition-all duration-200"
           >
             {voting ? "Voting..." : "Vote"}
           </button>
+
+          <p className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={handleViewResults}
+              className="text-sm text-muted hover:text-foreground active:scale-95 transition-all duration-200"
+            >
+              Just show me the results
+            </button>
+          </p>
         </form>
       ) : (
         /* Results view */
         <div className="mt-8">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-muted">
-              {totalVotes} vote{totalVotes !== 1 ? "s" : ""}
+            <p className="relative text-sm font-medium text-muted">
+              <span
+                key={totalVotes}
+                className={`inline-block ${countBump ? "animate-count-bump" : ""}`}
+              >
+                {totalVotes} vote{totalVotes !== 1 ? "s" : ""}
+              </span>
+              {/* Ping dot on new vote */}
+              {votePing && (
+                <span className="absolute -right-4 -top-1 h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-vote-ping rounded-full bg-primary" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+                </span>
+              )}
             </p>
             {status === "open" && (
               <div className="flex items-center gap-2 text-xs font-semibold text-accent">
@@ -176,21 +227,45 @@ export default function PollVote({
           </div>
 
           <div className="mt-5 space-y-4">
-            {results.map((result) => {
+            {results.map((result, i) => {
               const pct =
                 totalVotes > 0 ? (result.voteCount / totalVotes) * 100 : 0;
+              const isWinner =
+                result.voteCount > 0 && result.voteCount === maxVotes;
               return (
-                <div key={result.optionId}>
+                <div
+                  key={result.optionId}
+                  className="animate-fade-in-up"
+                  style={
+                    justRevealed
+                      ? { animationDelay: `${i * 100}ms` }
+                      : undefined
+                  }
+                >
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium">{result.text}</span>
+                    <span className="font-medium">
+                      {result.text}
+                      {isWinner && totalVotes > 0 && (
+                        <span className="ml-1.5 text-xs text-primary">
+                          ★
+                        </span>
+                      )}
+                    </span>
                     <span className="text-muted">
                       {result.voteCount} ({pct.toFixed(1)}%)
                     </span>
                   </div>
                   <div className="mt-2 h-3 overflow-hidden rounded-full bg-card-border">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-[var(--bar-from)] to-[var(--bar-to)] transition-all duration-500"
-                      style={{ width: `${pct}%` }}
+                      className={`h-full rounded-full bg-gradient-to-r from-[var(--bar-from)] to-[var(--bar-to)] transition-all duration-500 ${
+                        justRevealed ? "animate-bar-grow" : ""
+                      } ${isWinner && totalVotes > 0 ? "animate-glow-pulse" : ""}`}
+                      style={{
+                        width: `${pct}%`,
+                        animationDelay: justRevealed
+                          ? `${i * 100}ms`
+                          : undefined,
+                      }}
                     />
                   </div>
                 </div>
@@ -201,6 +276,20 @@ export default function PollVote({
           {hasVoted && status === "open" && (
             <p className="mt-6 text-center text-sm text-muted">
               Thanks for voting! Results update in real-time.
+            </p>
+          )}
+
+          {viewingResults && !hasVoted && status === "open" && (
+            <p className="mt-6 text-center">
+              <button
+                onClick={() => {
+                  setViewingResults(false);
+                  setJustRevealed(false);
+                }}
+                className="text-sm text-muted hover:text-foreground active:scale-95 transition-all duration-200"
+              >
+                &larr; Back to voting
+              </button>
             </p>
           )}
         </div>

@@ -27,6 +27,9 @@ const config: Config = {
         "input-bg": "var(--input-bg)",
         divider: "var(--divider)",
       },
+      transitionDuration: {
+        DEFAULT: "200ms",
+      },
     },
   },
   plugins: [],
