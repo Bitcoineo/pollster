@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import Link from "next/link";
 import { auth, signOut } from "@/src/auth";
 import ThemeToggle from "@/src/components/ThemeToggle";
+import SignInButton from "@/src/components/SignInButton";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -92,12 +93,7 @@ export default async function RootLayout({
                   </form>
                 </>
               ) : (
-                <Link
-                  href="/auth/signin"
-                  className="rounded-full bg-primary px-5 py-1.5 text-sm font-medium text-primary-fg hover:bg-primary-hover active:scale-95 transition-all duration-200"
-                >
-                  Sign in
-                </Link>
+                <SignInButton />
               )}
             </div>
           </div>
