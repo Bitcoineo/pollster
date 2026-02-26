@@ -23,6 +23,9 @@ export const metadata: Metadata = {
   },
   description: "Create polls, share them, get instant results.",
   metadataBase: new URL(process.env.NEXTAUTH_URL || "http://localhost:3000"),
+  icons: {
+    icon: { url: "/favicon.svg", type: "image/svg+xml" },
+  },
   openGraph: {
     title: "Pollster",
     description: "Create polls, share them, get instant results.",
