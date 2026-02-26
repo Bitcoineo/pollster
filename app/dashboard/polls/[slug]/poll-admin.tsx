@@ -31,6 +31,8 @@ export default function PollAdmin({
   const [status, setStatus] = useState(initialPoll.status);
   const [copied, setCopied] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const confirmTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [countBump, setCountBump] = useState(false);
   const [votePing, setVotePing] = useState(false);
   const prevTotalRef = useRef(initialPoll.totalVotes);
@@ -65,11 +67,19 @@ export default function PollAdmin({
     return () => es.close();
   }, [slug]);
 
-  async function handleClose() {
-    if (!confirm("Are you sure you want to close this poll? No more votes will be accepted.")) {
-      return;
-    }
+  function startConfirm() {
+    setConfirming(true);
+    confirmTimer.current = setTimeout(() => setConfirming(false), 5000);
+  }
 
+  function cancelConfirm() {
+    setConfirming(false);
+    if (confirmTimer.current) clearTimeout(confirmTimer.current);
+  }
+
+  async function handleClose() {
+    if (confirmTimer.current) clearTimeout(confirmTimer.current);
+    setConfirming(false);
     setClosing(true);
     const res = await fetch(`/api/polls/${slug}`, { method: "PATCH" });
 
@@ -205,15 +215,36 @@ export default function PollAdmin({
         </div>
       </div>
 
-      {/* Close poll button */}
+      {/* Close poll */}
       {status === "open" && (
-        <button
-          onClick={handleClose}
-          disabled={closing}
-          className="mt-10 rounded-full border border-danger/30 px-6 py-2.5 text-sm font-semibold text-danger hover:bg-danger-light active:scale-95 disabled:opacity-50 transition-all duration-200"
-        >
-          {closing ? "Closing..." : "Close Poll"}
-        </button>
+        <div className="mt-10">
+          {closing ? (
+            <span className="text-sm font-medium text-muted">Closing...</span>
+          ) : confirming ? (
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-muted">Are you sure?</span>
+              <button
+                onClick={handleClose}
+                className="rounded-full bg-danger/10 px-4 py-1.5 text-sm font-semibold text-danger hover:bg-danger/20 active:scale-95 transition-all duration-200"
+              >
+                Yes, close
+              </button>
+              <button
+                onClick={cancelConfirm}
+                className="rounded-full px-4 py-1.5 text-sm font-medium text-muted hover:text-foreground active:scale-95 transition-all duration-200"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={startConfirm}
+              className="rounded-full border border-danger/30 px-6 py-2.5 text-sm font-semibold text-danger hover:bg-danger-light active:scale-95 transition-all duration-200"
+            >
+              Close Poll
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
