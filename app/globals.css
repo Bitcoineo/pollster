@@ -22,6 +22,7 @@
   --gradient-to: #EA580C;
   --bar-from: #F59E0B;
   --bar-to: #D97706;
+  --bar-muted: #E5D5C0;
 }
 
 .dark {
@@ -44,6 +45,7 @@
   --gradient-to: #F59E0B;
   --bar-from: #FBBF24;
   --bar-to: #F59E0B;
+  --bar-muted: #4A3A2A;
 }
 
 body {

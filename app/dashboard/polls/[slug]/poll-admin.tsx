@@ -97,6 +97,8 @@ export default function PollAdmin({
   }
 
   const maxVotes = Math.max(...results.map((r) => r.voteCount), 0);
+  const maxCount = results.filter((r) => r.voteCount === maxVotes).length;
+  const hasLeader = maxVotes > 0 && maxCount === 1 && totalVotes >= 3;
 
   return (
     <div className="animate-fade-in-up">
@@ -171,24 +173,28 @@ export default function PollAdmin({
         <div className="mt-5 space-y-4">
           {results.map((result) => {
             const pct = totalVotes > 0 ? (result.voteCount / totalVotes) * 100 : 0;
-            const isWinner = result.voteCount > 0 && result.voteCount === maxVotes;
+            const isLeading = hasLeader && result.voteCount === maxVotes;
             return (
               <div key={result.optionId}>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium">
+                  <span className={isLeading ? "font-semibold" : "font-medium"}>
                     {result.text}
-                    {isWinner && totalVotes > 0 && (
-                      <span className="ml-1.5 text-xs text-primary">★</span>
-                    )}
                   </span>
-                  <span className="text-muted">
+                  <span className="flex items-center gap-2 text-muted">
+                    {isLeading && (
+                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                        Leading
+                      </span>
+                    )}
                     {result.voteCount} ({pct.toFixed(1)}%)
                   </span>
                 </div>
                 <div className="mt-2 h-3 overflow-hidden rounded-full bg-card-border">
                   <div
-                    className={`h-full rounded-full bg-gradient-to-r from-[var(--bar-from)] to-[var(--bar-to)] transition-all duration-500 ${
-                      isWinner && totalVotes > 0 ? "animate-glow-pulse" : ""
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      isLeading
+                        ? "bg-gradient-to-r from-[var(--bar-from)] to-[var(--bar-to)] animate-glow-pulse"
+                        : "bg-[var(--bar-muted)]"
                     }`}
                     style={{ width: `${pct}%` }}
                   />

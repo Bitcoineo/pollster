@@ -39,7 +39,6 @@ export default function PollVote({
   const [viewingResults, setViewingResults] = useState(false);
   const [voting, setVoting] = useState(false);
   const [error, setError] = useState("");
-  const [showConfetti, setShowConfetti] = useState(false);
   const [justRevealed, setJustRevealed] = useState(false);
   const [votePing, setVotePing] = useState(false);
   const [countBump, setCountBump] = useState(false);
@@ -109,9 +108,7 @@ export default function PollVote({
       }
 
       localStorage.setItem(`voted-${slug}`, "true");
-      setShowConfetti(true);
       setJustRevealed(true);
-      setTimeout(() => setShowConfetti(false), 1500);
       setHasVoted(true);
     } catch {
       setError("Something went wrong");
@@ -126,6 +123,8 @@ export default function PollVote({
 
   const showResults = hasVoted || viewingResults || status === "closed";
   const maxVotes = Math.max(...results.map((r) => r.voteCount), 0);
+  const maxCount = results.filter((r) => r.voteCount === maxVotes).length;
+  const hasLeader = maxVotes > 0 && maxCount === 1 && totalVotes >= 3;
 
   return (
     <div className="animate-fade-in-up">
@@ -145,13 +144,6 @@ export default function PollVote({
         </div>
       )}
 
-      {/* Confetti burst */}
-      {showConfetti && (
-        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
-          <span className="animate-confetti text-6xl">🎉</span>
-        </div>
-      )}
-
       {!showResults ? (
         /* Voting form */
         <form onSubmit={handleVote} className="mt-8">
@@ -161,7 +153,7 @@ export default function PollVote({
                 key={option.id}
                 className={`flex cursor-pointer items-center gap-4 rounded-2xl border-2 p-5 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
                   selectedOption === option.id
-                    ? "animate-pop border-primary bg-primary/5 shadow-sm"
+                    ? "border-primary bg-primary/5 shadow-sm"
                     : "border-card-border bg-card hover:border-primary/30 hover:shadow-sm"
                 }`}
               >
@@ -230,8 +222,8 @@ export default function PollVote({
             {results.map((result, i) => {
               const pct =
                 totalVotes > 0 ? (result.voteCount / totalVotes) * 100 : 0;
-              const isWinner =
-                result.voteCount > 0 && result.voteCount === maxVotes;
+              const isLeading =
+                hasLeader && result.voteCount === maxVotes;
               return (
                 <div
                   key={result.optionId}
@@ -243,23 +235,25 @@ export default function PollVote({
                   }
                 >
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium">
+                    <span className={isLeading ? "font-semibold" : "font-medium"}>
                       {result.text}
-                      {isWinner && totalVotes > 0 && (
-                        <span className="ml-1.5 text-xs text-primary">
-                          ★
+                    </span>
+                    <span className="flex items-center gap-2 text-muted">
+                      {isLeading && (
+                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                          Leading
                         </span>
                       )}
-                    </span>
-                    <span className="text-muted">
                       {result.voteCount} ({pct.toFixed(1)}%)
                     </span>
                   </div>
                   <div className="mt-2 h-3 overflow-hidden rounded-full bg-card-border">
                     <div
-                      className={`h-full rounded-full bg-gradient-to-r from-[var(--bar-from)] to-[var(--bar-to)] transition-all duration-500 ${
-                        justRevealed ? "animate-bar-grow" : ""
-                      } ${isWinner && totalVotes > 0 ? "animate-glow-pulse" : ""}`}
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        isLeading
+                          ? "bg-gradient-to-r from-[var(--bar-from)] to-[var(--bar-to)] animate-glow-pulse"
+                          : "bg-[var(--bar-muted)]"
+                      } ${justRevealed ? "animate-bar-grow" : ""}`}
                       style={{
                         width: `${pct}%`,
                         animationDelay: justRevealed
