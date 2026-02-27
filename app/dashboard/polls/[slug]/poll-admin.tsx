@@ -180,31 +180,31 @@ export default function PollAdmin({
           )}
         </div>
 
-        <div className="mt-5 space-y-4">
+        <div className="mt-4 space-y-3">
           {results.map((result) => {
             const pct = totalVotes > 0 ? (result.voteCount / totalVotes) * 100 : 0;
             const isLeading = hasLeader && result.voteCount === maxVotes;
             return (
               <div key={result.optionId}>
-                <div className="flex items-center justify-between text-sm">
-                  <span className={isLeading ? "font-semibold" : "font-medium"}>
+                <div className="flex items-baseline justify-between text-sm">
+                  <span className={isLeading ? "font-semibold" : "font-medium text-foreground/80"}>
                     {result.text}
                   </span>
-                  <span className="flex items-center gap-2 text-muted">
+                  <span className="flex shrink-0 items-center gap-1.5 text-xs text-muted">
                     {isLeading && (
-                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                      <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-primary">
                         Leading
                       </span>
                     )}
-                    {result.voteCount} ({pct.toFixed(1)}%)
+                    {pct.toFixed(0)}%
                   </span>
                 </div>
-                <div className="mt-2 h-3 overflow-hidden rounded-full bg-card-border">
+                <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-[var(--bar-track)]">
                   <div
-                    className={`h-full rounded-full transition-all duration-500 ${
+                    className={`h-full rounded-full transition-all duration-600 ease-out ${
                       isLeading
-                        ? "bg-gradient-to-r from-[var(--bar-from)] to-[var(--bar-to)] animate-glow-pulse"
-                        : "bg-[var(--bar-muted)]"
+                        ? "bg-gradient-to-r from-[var(--bar-from)] to-[var(--bar-to)]"
+                        : "bg-[var(--bar-muted)] opacity-80"
                     }`}
                     style={{ width: `${pct}%` }}
                   />

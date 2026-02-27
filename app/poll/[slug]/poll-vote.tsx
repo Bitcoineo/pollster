@@ -192,14 +192,13 @@ export default function PollVote({
         /* Results view */
         <div className="mt-8">
           <div className="flex items-center justify-between">
-            <p className="relative text-sm font-medium text-muted">
+            <p className="relative text-xs text-muted">
               <span
                 key={totalVotes}
                 className={`inline-block ${countBump ? "animate-count-bump" : ""}`}
               >
                 {totalVotes} vote{totalVotes !== 1 ? "s" : ""}
               </span>
-              {/* Ping dot on new vote */}
               {votePing && (
                 <span className="absolute -right-4 -top-1 h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-vote-ping rounded-full bg-primary" />
@@ -218,7 +217,7 @@ export default function PollVote({
             )}
           </div>
 
-          <div className="mt-5 space-y-4">
+          <div className="mt-4 space-y-3">
             {results.map((result, i) => {
               const pct =
                 totalVotes > 0 ? (result.voteCount / totalVotes) * 100 : 0;
@@ -230,34 +229,34 @@ export default function PollVote({
                   className="animate-fade-in-up"
                   style={
                     justRevealed
-                      ? { animationDelay: `${i * 100}ms` }
+                      ? { animationDelay: `${i * 80}ms` }
                       : undefined
                   }
                 >
-                  <div className="flex items-center justify-between text-sm">
-                    <span className={isLeading ? "font-semibold" : "font-medium"}>
+                  <div className="flex items-baseline justify-between text-sm">
+                    <span className={isLeading ? "font-semibold" : "font-medium text-foreground/80"}>
                       {result.text}
                     </span>
-                    <span className="flex items-center gap-2 text-muted">
+                    <span className="flex shrink-0 items-center gap-1.5 text-xs text-muted">
                       {isLeading && (
-                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                        <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-primary">
                           Leading
                         </span>
                       )}
-                      {result.voteCount} ({pct.toFixed(1)}%)
+                      {pct.toFixed(0)}%
                     </span>
                   </div>
-                  <div className="mt-2 h-3 overflow-hidden rounded-full bg-card-border">
+                  <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-[var(--bar-track)]">
                     <div
-                      className={`h-full rounded-full transition-all duration-500 ${
+                      className={`h-full rounded-full transition-all duration-600 ease-out ${
                         isLeading
-                          ? "bg-gradient-to-r from-[var(--bar-from)] to-[var(--bar-to)] animate-glow-pulse"
-                          : "bg-[var(--bar-muted)]"
+                          ? "bg-gradient-to-r from-[var(--bar-from)] to-[var(--bar-to)]"
+                          : "bg-[var(--bar-muted)] opacity-80"
                       } ${justRevealed ? "animate-bar-grow" : ""}`}
                       style={{
                         width: `${pct}%`,
                         animationDelay: justRevealed
-                          ? `${i * 100}ms`
+                          ? `${i * 80}ms`
                           : undefined,
                       }}
                     />
@@ -268,19 +267,19 @@ export default function PollVote({
           </div>
 
           {hasVoted && status === "open" && (
-            <p className="mt-6 text-center text-sm text-muted">
+            <p className="mt-5 text-center text-xs text-muted">
               Thanks for voting! Results update in real-time.
             </p>
           )}
 
           {viewingResults && !hasVoted && status === "open" && (
-            <p className="mt-6 text-center">
+            <p className="mt-5 text-center">
               <button
                 onClick={() => {
                   setViewingResults(false);
                   setJustRevealed(false);
                 }}
-                className="text-sm text-muted hover:text-foreground active:scale-95 transition-all duration-200"
+                className="text-xs text-muted hover:text-foreground active:scale-95 transition-all duration-200"
               >
                 &larr; Back to voting
               </button>
