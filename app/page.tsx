@@ -8,20 +8,21 @@ export default async function Home() {
     <div>
       {/* Hero */}
       <section className="relative overflow-hidden px-6 py-24 sm:py-32">
-        {/* Warm gradient glow */}
+        {/* Cool gradient glow */}
         <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-gradient-to-br from-amber-200/40 via-orange-100/30 to-transparent blur-3xl dark:from-amber-900/20 dark:via-orange-900/10" />
+          <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-gradient-to-br from-indigo-200/40 via-blue-100/30 to-transparent blur-3xl dark:from-indigo-900/20 dark:via-blue-900/10" />
+          <div className="absolute inset-0 bg-dots opacity-[0.03] dark:opacity-[0.04]" />
         </div>
 
         <div className="mx-auto max-w-2xl text-center">
           <h1 className="text-5xl font-extrabold tracking-tight sm:text-6xl lg:text-7xl">
             Create instant{" "}
-            <span className="bg-gradient-to-r from-[var(--gradient-from)] to-[var(--gradient-to)] bg-clip-text text-transparent">
+            <span className="relative inline-block bg-gradient-to-r from-[var(--gradient-from)] to-[var(--gradient-to)] bg-clip-text text-transparent" style={{ transform: "rotate(-2deg)" }}>
               polls
             </span>
           </h1>
           <p className="mt-6 text-lg leading-relaxed text-muted sm:text-xl">
-            Share with anyone, get real-time results. No login required to vote.
+            Ask the crowd, get answers instantly. No login required to vote.
           </p>
 
           <div className="mt-10 flex items-center justify-center gap-4">
@@ -56,7 +57,7 @@ export default async function Home() {
       <section className="mx-auto max-w-4xl px-6 pb-24">
         <div className="grid gap-6 sm:grid-cols-3">
           <div className="rounded-2xl border border-card-border bg-card p-8 transition-shadow hover:shadow-md">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-2xl dark:bg-amber-900/30">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-2xl dark:bg-indigo-900/30">
               🔗
             </div>
             <h3 className="mt-5 text-lg font-bold">Shareable Links</h3>
@@ -65,7 +66,7 @@ export default async function Home() {
             </p>
           </div>
           <div className="rounded-2xl border border-card-border bg-card p-8 transition-shadow hover:shadow-md">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 text-2xl dark:bg-orange-900/30">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 text-2xl dark:bg-violet-900/30">
               ⚡
             </div>
             <h3 className="mt-5 text-lg font-bold">Real-time Results</h3>
@@ -74,7 +75,7 @@ export default async function Home() {
             </p>
           </div>
           <div className="rounded-2xl border border-card-border bg-card p-8 transition-shadow hover:shadow-md">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-2xl dark:bg-emerald-900/30">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-100 text-2xl dark:bg-cyan-900/30">
               🔒
             </div>
             <h3 className="mt-5 text-lg font-bold">One Vote Per Person</h3>
