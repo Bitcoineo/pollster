@@ -1,113 +1,67 @@
 # Pollster
 
-Create polls, share them with anyone, and watch votes roll in — live.
+Create polls, share them with anyone, and watch votes arrive in real time. No page refresh, no websockets — results stream via Server-Sent Events.
 
-**[Live Demo](https://pollster-bitcoineo.vercel.app)**
+**Stack:** `Next.js 14 · TypeScript · Auth.js v5 · Drizzle ORM · Turso (SQLite) · Tailwind CSS · SSE · Vercel`
+
+**Live:** https://pollster-bitcoineo.vercel.app
+
+---
+
+## Why I built this
+
+I wanted to understand Server-Sent Events in a real context: keeping a persistent HTTP connection open, pushing updates from the server as votes arrive, and having the client reflect changes instantly without polling or websockets. Pollster is the result. The SSE stream endpoint broadcasts to every connected client whenever a new vote is recorded.
 
 ## Features
 
-- **Real-time results** — votes stream in via Server-Sent Events (SSE) with no page refresh
-- **Anonymous voting** — anyone with the link can vote, no account required
-- **One vote per person** — IP-based deduplication enforced at the database level
-- **Google OAuth + email/password** — poll creators sign in to manage their polls
-- **Poll lifecycle** — create, share, monitor live, and close when you're done
-- **Shareable links** — every poll gets a unique short URL
-- **Playful animations** — staggered result bars, live vote ping indicators, micro-interactions
-- **Indigo/blue UI** — clean, modern design system with dark mode support
+- **Real-time results** Votes stream in via SSE with no page refresh
+- **Anonymous voting** Anyone with the link can vote, no account required
+- **Vote deduplication** IP-based, enforced at the database level (returns 409 on duplicate)
+ntication** Google OAuth and email/password for poll creators
+- **Poll lifecycle** Create, share, monitor live, and close when done
+- **Shareable links** Every poll gets a unique slug-based URL
 
-## Tech Stack
+## Setup
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | [Next.js 14](https://nextjs.org) (App Router) |
-| Language | TypeScript |
-| Database | [Turso](https://turso.tech) (libSQL / SQLite) |
-| ORM | [Drizzle ORM](https://orm.drizzle.team) |
-| Auth | [Auth.js v5](https://authjs.dev) (NextAuth beta) |
-| Styling | [Tailwind CSS 3](https://tailwindcss.com) |
-| Real-time | Server-Sent Events (SSE) |
-| Deployment | [Vercel](https://vercel.com) |
+    git clone https://github.com/Bitcoineo/pollster.git
+    cd pollster
+    pnpm install
+    cp .env.example .env.local
 
-## Getting Started
+Fill in your .env.local:
 
-### Prerequisites
+    DATABASE_URL=           # Turso database URL (or omit for local file:local.db)
+    DATABASE_AUTH_TOKEN=    # Turso auth token (not needed for local dev)
+    NEXTAUTH_URL=           # http://localhost:3000 for dev
+    NEXTAUTH_SECRET=        # openssl rand -base64 32
+    GOOGLE_CLIENT_ID=       # Optional
+    GOOGLE_CLIENT_SECRET=   # Optional
 
-- Node.js 18+
-- [pnpm](https://pnpm.io)
-- A [Turso](https://turso.tech) database (or use a local SQLite file for development)
-- Google OAuth credentials (optional — email/password works without it)
+Run migrations and start:
 
-### Setup
+    pnpm db:migrate
+    pnpm dev
 
-```bash
-git clone https://github.com/Bitcoineo/pollster.git
-cd pollster
-pnpm install
-```
-
-Copy the environment template and fill in your values:
-
-```bash
-cp .env.example .env.local
-```
-
-The required variables are documented in `.env.example`:
-
-| Variable | Description |
-|----------|-------------|
-| `DATABASE_URL` | Turso database URL (or omit for local `file:local.db`) |
-| `DATABASE_AUTH_TOKEN` | Turso auth token (not needed for local dev) |
-| `NEXTAUTH_URL` | Your app URL (`http://localhost:3000` for dev) |
-| `NEXTAUTH_SECRET` | Random secret — generate with `openssl rand -base64 32` |
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID (optional) |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret (optional) |
-
-Run migrations and start the dev server:
-
-```bash
-pnpm db:generate    # generate migration files (only needed after schema changes)
-pnpm db:migrate     # apply migrations
-pnpm dev            # start at http://localhost:3000
-```
+Open http://localhost:3000
 
 ## API Reference
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| `POST` | `/api/polls` | Required | Create a new poll |
-| `GET` | `/api/polls` | Required | List your polls |
-| `GET` | `/api/polls/[slug]` | Public | Get poll data + results |
-| `POST` | `/api/polls/[slug]/vote` | Public | Cast a vote (IP-tracked) |
-| `PATCH` | `/api/polls/[slug]` | Creator | Close a poll |
-| `GET` | `/api/polls/[slug]/stream` | Public | SSE stream of live results |
+| POST | /api/polls | Required | Create a poll |
+| GET | /api/polls | Required | List your polls |
+| GET | /api/polls/[slug] | Public | Get poll data and results |
+| POST | /api/polls/[slug]/vote | Public | Cast a vote (IP-tracked, 409 on duplicate) |
+| PATCH | /api/polls/[slug] | Creator | Close a poll |
+| GET | /api/polls/[slug]/stream | Public | SSE stream of live results |
 
-**Auth** is handled via Auth.js session cookies. Public endpoints require no authentication. The `PATCH` close endpoint verifies the caller is the poll's creator.
+## Deploy to Vercel
 
-**Vote deduplication**: `POST /vote` returns `409` if the same IP has already voted on that poll.
+1. Push to GitHub
+2. Import the repo on Vercel
+3. Add all environment variables
+4. Deploy (migrations run automatically during build)
 
-## Deploying to Vercel
+## GitHub Topics
 
-1. Push your repo to GitHub
-
-2. Create a Turso database:
-   ```bash
-   turso db create pollster
-   turso db tokens create pollster
-   ```
-
-3. Import the project in [Vercel](https://vercel.com/new) and add environment variables:
-   - `DATABASE_URL` — your Turso database URL
-   - `DATABASE_AUTH_TOKEN` — your Turso auth token
-   - `NEXTAUTH_URL` — your Vercel deployment URL
-   - `NEXTAUTH_SECRET` — a random secret
-   - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — if using Google OAuth
-
-4. Deploy. The build script runs migrations automatically before building.
-
-## Built by Bitcoineo
-
-[Twitter / X](https://x.com/Bitcoineo) · [GitHub](https://github.com/Bitcoineo)
-
-## License
-
-MIT
+`nextjs` `typescript` `sse` `real-time` `auth` `authjs` `drizzle-orm` `turso` `sqlite` `tailwind` `vercel` `polling`
