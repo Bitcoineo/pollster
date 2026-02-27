@@ -17,7 +17,7 @@ export default async function Home() {
         <div className="mx-auto max-w-2xl text-center">
           <h1 className="text-5xl font-extrabold tracking-tight sm:text-6xl lg:text-7xl">
             Create instant{" "}
-            <span className="relative inline-block bg-gradient-to-r from-[var(--gradient-from)] to-[var(--gradient-to)] bg-clip-text text-transparent animate-hero-word">
+            <span className="bg-gradient-to-r from-[var(--gradient-from)] to-[var(--gradient-to)] bg-clip-text text-transparent">
               polls
             </span>
           </h1>
