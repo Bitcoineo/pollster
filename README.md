@@ -12,8 +12,8 @@ Create polls, share them with anyone, and watch votes roll in — live.
 - **Google OAuth + email/password** — poll creators sign in to manage their polls
 - **Poll lifecycle** — create, share, monitor live, and close when you're done
 - **Shareable links** — every poll gets a unique short URL
-- **Gamified interactions** — confetti on vote, staggered result animations, live vote ping indicators
-- **Warm organic UI** — amber/orange design system with dark mode support
+- **Playful animations** — staggered result bars, live vote ping indicators, micro-interactions
+- **Indigo/blue UI** — clean, modern design system with dark mode support
 
 ## Tech Stack
 
@@ -40,7 +40,7 @@ Create polls, share them with anyone, and watch votes roll in — live.
 ### Setup
 
 ```bash
-git clone https://github.com/your-username/pollster.git
+git clone https://github.com/Bitcoineo/pollster.git
 cd pollster
 pnpm install
 ```
@@ -103,6 +103,10 @@ pnpm dev            # start at http://localhost:3000
    - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — if using Google OAuth
 
 4. Deploy. The build script runs migrations automatically before building.
+
+## Built by Bitcoineo
+
+[Twitter / X](https://x.com/Bitcoineo) · [GitHub](https://github.com/Bitcoineo)
 
 ## License
 
