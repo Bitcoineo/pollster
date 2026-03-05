@@ -30,37 +30,33 @@ export async function createPoll(
     position: i,
   }));
 
-  await db.insert(options).values(optionValues);
-
   const createdOptions = await db
-    .select()
-    .from(options)
-    .where(eq(options.pollId, poll.id))
-    .orderBy(options.position);
+    .insert(options)
+    .values(optionValues)
+    .returning();
 
   return { ...poll, options: createdOptions };
 }
 
 export async function getMyPolls(userId: string) {
-  const userPolls = await db
-    .select()
+  const rows = await db
+    .select({
+      id: polls.id,
+      userId: polls.userId,
+      question: polls.question,
+      slug: polls.slug,
+      status: polls.status,
+      createdAt: polls.createdAt,
+      updatedAt: polls.updatedAt,
+      totalVotes: sql<number>`count(${votes.id})`,
+    })
     .from(polls)
+    .leftJoin(votes, eq(votes.pollId, polls.id))
     .where(eq(polls.userId, userId))
+    .groupBy(polls.id)
     .orderBy(desc(polls.createdAt));
 
-  // Get vote counts for each poll
-  const pollsWithCounts = await Promise.all(
-    userPolls.map(async (poll) => {
-      const result = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(votes)
-        .where(eq(votes.pollId, poll.id))
-        .get();
-      return { ...poll, totalVotes: result?.count ?? 0 };
-    })
-  );
-
-  return pollsWithCounts;
+  return rows;
 }
 
 export async function getPollBySlug(slug: string) {
@@ -72,13 +68,14 @@ export async function getPollBySlug(slug: string) {
 
   if (!poll) return null;
 
-  const pollOptions = await db
-    .select()
-    .from(options)
-    .where(eq(options.pollId, poll.id))
-    .orderBy(options.position);
-
-  const results = await getPollResults(poll.id);
+  const [pollOptions, results] = await Promise.all([
+    db
+      .select()
+      .from(options)
+      .where(eq(options.pollId, poll.id))
+      .orderBy(options.position),
+    getPollResults(poll.id),
+  ]);
 
   const totalVotes = results.reduce((sum, r) => sum + r.voteCount, 0);
 

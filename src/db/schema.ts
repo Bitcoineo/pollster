@@ -78,6 +78,8 @@ export const verificationTokens = sqliteTable(
 // APP TABLES
 // =============================================================================
 
+export type PollStatus = "open" | "closed";
+
 export const polls = sqliteTable(
   "poll",
   {

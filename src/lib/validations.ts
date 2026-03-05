@@ -11,3 +11,9 @@ export const createPollSchema = z.object({
 export const castVoteSchema = z.object({
   optionId: z.string().min(1, "Option ID is required"),
 });
+
+export const signupSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});

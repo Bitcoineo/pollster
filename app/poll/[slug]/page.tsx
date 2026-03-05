@@ -1,14 +1,17 @@
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getPollBySlug } from "@/src/lib/polls";
 import PollVote from "./poll-vote";
+
+const getCachedPoll = cache(getPollBySlug);
 
 type Props = {
   params: { slug: string };
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const poll = await getPollBySlug(params.slug);
+  const poll = await getCachedPoll(params.slug);
   if (!poll) return { title: "Poll not found" };
 
   return {
@@ -19,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PublicPollPage({ params }: Props) {
-  const poll = await getPollBySlug(params.slug);
+  const poll = await getCachedPoll(params.slug);
   if (!poll) notFound();
 
   return (
